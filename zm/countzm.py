@@ -4,6 +4,8 @@ import os
 import sys
 import time
 import shutil
+import argparse
+
 
 def load_key_value_file(filename):
     res = {}
@@ -30,8 +32,8 @@ def load_filter_file(filename):
     return res
 
 
-def run(f1, f2, f3=""):
-    outfilename = time.strftime("output_%Y%m%d%H%M%S.csv")
+def run(outfilename, f1, f2, f3=""):
+    #outfilename = time.strftime("output_%Y%m%d%H%M%S.csv")
     dict2 = load_key_value_file(f2)
     dict1 = load_key_value_file(f1)
     filter_key = set()
@@ -72,13 +74,17 @@ def write_file(outfilename, res, allv2):
     shutil.move("tmp.output", outfilename)
 
 def main():
-    if len(sys.argv) < 3:
-        print "Usage: %s file1 file2 [file3]" % sys.argv[0]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('infile', nargs="+")
+    parser.add_argument('-o', required=True)
+    argv = parser.parse_args()
+
+    if len(argv.infile) < 2:
+        print "Error: need at least 2 input files"
         sys.exit(1)
-    else:
-        file1 = sys.argv[1]
-        file2 = sys.argv[2]
-    file3 = sys.argv[3] if len(sys.argv) >= 4 else None
-    run(file1, file2, file3)
+    file1 = argv.infile[0]
+    file2 = argv.infile[1]
+    file3 = argv.infile[2] if len(argv.infile) >= 3 else None
+    run(argv.o, file1, file2, file3)
 
 main()
