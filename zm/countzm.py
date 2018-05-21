@@ -34,7 +34,7 @@ def run(f1, f2, f3=""):
     outfilename = time.strftime("output_%Y%m%d%H%M%S.csv")
     dict2 = load_key_value_file(f2)
     dict1 = load_key_value_file(f1)
-    filter_key = None
+    filter_key = set()
     if f3 and os.path.isfile(f3):
         filter_key = load_filter_file(f3)
 
@@ -51,6 +51,9 @@ def run(f1, f2, f3=""):
         v1dict = res.setdefault(v1, {})
         count = v1dict.setdefault(v2, 0)
         v1dict[v2] = count + 1
+
+    for k in filter_key:
+        res.setdefault(k, {})
 
     print "line * column: %s * %s" % (len(res), len(allv2))
     write_file(outfilename, res, allv2)
