@@ -1,0 +1,39 @@
+#!/bin/bash
+
+name=$1
+mkdir -p $name/DEBIAN/
+rootdir=$name/
+
+awk -v name=$name 'BEGIN {P="0"}
+{ 
+        if ($2 == name) {
+                P="1"
+        }
+        if (P == "1") {
+                if ($0 == "") {
+                        exit
+                }
+                if ($1 != "Status:") {
+                        print $0
+                }
+        }
+}
+' /var/lib/dpkg/status > $rootdir/DEBIAN/control
+
+for f in /var/lib/dpkg/info/$name.*
+do
+        file=$(echo $f | cut -d "." -f2)
+        cp -aP $f $rootdir/DEBIAN/$file
+done
+rm -f $rootdir/DEBIAN/$name.list
+while read f
+do
+        if test -d $f;then
+                mkdir -p $rootdir$f
+        else
+                cp -a $f $rootdir$f
+        fi
+done < /var/lib/dpkg/info/$name.list
+
+dpkg-dev -b $name $name.deb
+
